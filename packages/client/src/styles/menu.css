@@ -1,0 +1,509 @@
+/* ==========================================================================
+   Menus.
+
+   A game main menu, not a settings page: the scene runs full-bleed behind
+   everything, the content sits in one column against it, and each screen is its
+   own place rather than another section of a long scroll.
+   ========================================================================== */
+
+/*
+  The scene, mounted once for the session and living underneath every menu
+  screen. It carries the fallback gradient too, so the menu above it can stay
+  transparent and let it through.
+*/
+.menubackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(120% 90% at 78% 18%, rgba(78, 132, 190, 0.3) 0%, transparent 55%),
+    radial-gradient(90% 70% at 12% 88%, rgba(126, 84, 190, 0.26) 0%, transparent 60%),
+    linear-gradient(168deg, #0a0d1a 0%, #05060e 62%, #04050a 100%);
+}
+
+.menubackdrop[data-map='station'] {
+  background:
+    radial-gradient(120% 90% at 70% 14%, rgba(96, 118, 208, 0.3) 0%, transparent 55%),
+    radial-gradient(90% 70% at 16% 86%, rgba(60, 74, 150, 0.24) 0%, transparent 60%),
+    linear-gradient(168deg, #080b1c 0%, #05061a 62%, #03040e 100%);
+}
+
+.menubackdrop canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  /* Fades in once the scene has something to show. */
+  animation: menu-backdrop-in 1.4s ease both;
+}
+
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  display: grid;
+  color: var(--map-text);
+  font-family: var(--map-body-font);
+}
+
+@keyframes menu-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+  Legibility. The scene is busy and text has to sit on it, so the side the
+  content is on is darkened and the frame is closed in at top and bottom.
+*/
+.menu__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Working screens: the scene is atmosphere, the content has to win. */
+  background:
+    radial-gradient(120% 100% at 50% 40%, rgba(3, 5, 12, 0.72) 0%, rgba(3, 5, 12, 0.9) 100%),
+    linear-gradient(to bottom, rgba(3, 5, 12, 0.8) 0%, transparent 24%, transparent 76%, rgba(3, 5, 12, 0.85) 100%);
+}
+
+/* The main menu is a poster: text one side, scene the other. */
+.menu--hero .menu__scrim {
+  background:
+    linear-gradient(100deg, rgba(3, 5, 12, 0.94) 0%, rgba(3, 5, 12, 0.82) 28%, rgba(3, 5, 12, 0.12) 62%, transparent 100%),
+    linear-gradient(to bottom, rgba(3, 5, 12, 0.7) 0%, transparent 22%, transparent 74%, rgba(3, 5, 12, 0.8) 100%);
+}
+
+.menu__content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* --- header --------------------------------------------------------------- */
+
+.menu__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  padding: clamp(1rem, 2.4vh, 1.9rem) clamp(1.1rem, 4vw, 3.4rem);
+}
+
+.menu__wordmark {
+  font-family: var(--map-display-font);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--map-text-muted);
+}
+
+.menu__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem 0.45rem 0.7rem;
+  font-size: 0.86rem;
+  letter-spacing: 0.02em;
+  color: var(--map-text);
+  text-decoration: none;
+  border: 1px solid var(--map-border);
+  border-radius: 999px;
+  background: rgba(8, 11, 22, 0.82);
+  transition:
+    border-color var(--dur-fast) ease,
+    background var(--dur-fast) ease,
+    transform var(--dur-fast) ease;
+}
+.menu__back:hover {
+  border-color: var(--map-accent);
+  background: rgba(14, 19, 34, 0.94);
+  transform: translateX(-2px);
+}
+
+.menu__headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* --- body ----------------------------------------------------------------- */
+
+.menu__body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 clamp(1.1rem, 4vw, 3.4rem) clamp(1.4rem, 4vh, 3rem);
+  display: flex;
+  flex-direction: column;
+  /*
+    Top-aligned, not centred: a centred column that is taller than the
+    viewport has its top clipped rather than scrolled to, which hid the
+    heading on every long screen.
+  */
+  justify-content: flex-start;
+  gap: clamp(0.9rem, 2.2vh, 1.6rem);
+}
+
+.menu__body > * {
+  width: 100%;
+  max-width: 30rem;
+}
+.menu__body--wide > * {
+  max-width: 62rem;
+}
+
+/* The hero column is short enough to centre safely. */
+.menu--hero .menu__body {
+  justify-content: center;
+}
+
+.menu__lockup {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.menu__title {
+  margin: 0;
+  font-family: var(--map-display-font);
+  font-size: clamp(3rem, 8.5vw, 6.2rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  /* A soft light through the letterforms rather than a flat fill. */
+  background: linear-gradient(168deg, #ffffff 0%, #dce8fb 42%, var(--map-accent) 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+.menu__screenTitle {
+  margin: 0;
+  font-family: var(--map-display-font);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+}
+
+.menu__heading {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.menu__subtitle {
+  margin: 0;
+  max-width: 34ch;
+  font-size: clamp(0.9rem, 1.5vw, 1.02rem);
+  line-height: 1.5;
+  color: var(--map-text-muted);
+}
+
+.menu__panel {
+  display: grid;
+  gap: clamp(0.9rem, 2vh, 1.5rem);
+}
+
+/*
+  Working screens get a surface under them. Without one the form sits
+  directly on the scene and reads as broken rather than as floating.
+*/
+.menu:not(.menu--hero) .menu__panel {
+  padding: clamp(0.9rem, 2vw, 1.5rem);
+  background: rgba(9, 12, 22, 0.88);
+  border: 1px solid var(--map-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel);
+}
+
+.menu:not(.menu--hero) .menu__heading {
+  padding-top: clamp(0.3rem, 1.5vh, 1rem);
+}
+
+/* --- menu items ----------------------------------------------------------- */
+
+.menugroup {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.menugroup__label {
+  margin: 0;
+  font-family: var(--map-display-font);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--map-text-muted);
+}
+
+.menugroup__items {
+  display: grid;
+  gap: 2px;
+}
+
+.menuitem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 1.05rem;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  color: var(--map-text);
+  background: rgba(10, 14, 26, 0.78);
+  border: 1px solid transparent;
+  border-left: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    padding-left var(--dur-fast) ease;
+}
+
+.menuitem:hover,
+.menuitem:focus-visible {
+  background: rgba(22, 29, 52, 0.94);
+  border-left-color: var(--map-accent);
+  padding-left: 1.35rem;
+}
+
+.menuitem--primary {
+  background: linear-gradient(100deg, var(--map-accent-soft) 0%, rgba(12, 16, 30, 0.86) 70%);
+  border-left-color: var(--map-accent);
+  padding-block: 1.05rem;
+}
+.menuitem--primary .menuitem__label {
+  font-size: 1.12rem;
+}
+
+.menuitem__text {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.menuitem__label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--map-display-font);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+.menuitem__hint {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--map-text-muted);
+}
+
+.menuitem__badge {
+  padding: 0.05rem 0.42rem;
+  font-family: var(--map-body-font);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--map-accent);
+  border: 1px solid var(--map-border);
+  border-radius: 999px;
+}
+
+.menuitem__chevron {
+  margin-left: auto;
+  font-size: 1rem;
+  color: var(--map-text-muted);
+  transition:
+    transform var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.menuitem:hover .menuitem__chevron,
+.menuitem:focus-visible .menuitem__chevron {
+  transform: translateX(4px);
+  color: var(--map-accent);
+}
+
+/* --- player chip ---------------------------------------------------------- */
+
+.playerchip {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+  border: 1px solid var(--map-border);
+  border-radius: 999px;
+  background: rgba(8, 11, 22, 0.88);
+}
+
+.playerchip__who {
+  display: grid;
+  gap: 0.05rem;
+  line-height: 1.15;
+}
+
+.playerchip__label {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--map-text-muted);
+}
+
+.playerchip__name {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-family: var(--map-display-font);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.playerchip__rating {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--map-text-muted);
+}
+
+.playerchip__edit {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.2rem;
+}
+.playerchip__editRow {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* --- map cards on the main menu ------------------------------------------- */
+
+.menumaps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem;
+}
+
+.menumap {
+  position: relative;
+  overflow: hidden;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--map-border);
+  border-radius: var(--radius-sm);
+  background: rgba(10, 14, 26, 0.82);
+}
+
+.menumap::before {
+  content: '';
+  position: absolute;
+  inset: auto auto -40% -20%;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--card-accent);
+  opacity: 0.22;
+  filter: blur(28px);
+}
+
+.menumap__name {
+  position: relative;
+  margin: 0 0 0.2rem;
+  font-family: var(--map-display-font);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.menumap__tagline {
+  position: relative;
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--map-text-muted);
+}
+
+/* --- footer links --------------------------------------------------------- */
+
+.menu__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1.1rem;
+  font-size: 0.78rem;
+  color: var(--map-text-muted);
+}
+.menu__meta a {
+  color: var(--map-text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.menu__meta a:hover {
+  color: var(--map-text);
+  border-bottom-color: var(--map-accent);
+}
+
+/* --- screens that wrap an existing form ----------------------------------- */
+
+/*
+  The lobby, the create form and the settings screens keep their own markup and
+  are dropped into the panel; these undo the page padding they used to bring
+  with them.
+*/
+.menu__panel .page {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+/*
+  The wrapped pages keep their header row - it carries their status line and
+  their action buttons - but the shell now owns the title and the way back,
+  so what is left reads as a toolbar.
+*/
+.menu__panel .page__head {
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--map-border);
+  align-items: center;
+}
+.menu__panel .page__head:empty,
+.menu__panel .page__head > div:empty {
+  display: none;
+}
+.menu__panel .page__head .muted {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .menu__scrim {
+    background:
+      linear-gradient(to bottom, rgba(3, 5, 12, 0.86) 0%, rgba(3, 5, 12, 0.72) 45%, rgba(3, 5, 12, 0.92) 100%);
+  }
+  .menu__body {
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+  }
+  .menu__body > * {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu__backdrop {
+    animation-duration: 1ms;
+  }
+  .menuitem,
+  .menuitem__chevron,
+  .menu__back {
+    transition: none;
+  }
+}

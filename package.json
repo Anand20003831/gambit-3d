@@ -1,0 +1,63 @@
+{
+  "name": "gambit3d",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Gambit3D - a polished, fully playable 3D multiplayer chess game",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/client"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspace @gambit3d/shared && concurrently -n server,client -c cyan,magenta \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --workspace @gambit3d/server",
+    "dev:client": "npm run dev --workspace @gambit3d/client",
+    "build": "npm run build --workspace @gambit3d/shared && npm run build --workspace @gambit3d/server && npm run build --workspace @gambit3d/client",
+    "build:shared": "npm run build --workspace @gambit3d/shared",
+    "start": "npm run start --workspace @gambit3d/server",
+    "start:lan": "node scripts/start-lan.mjs",
+    "lan": "node scripts/start-lan.mjs",
+    "lan:info": "node scripts/lan-info.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "test": "npm run build:shared && vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "verify": "npm run build:shared && npm run typecheck && npm run lint && npm run test && npm run build",
+    "clean": "node scripts/clean.mjs",
+    "assets:fetch": "node scripts/fetch-models.mjs",
+    "assets:models": "node scripts/build-models.mjs",
+    "assets:build": "node scripts/build-assets.mjs",
+    "assets": "npm run assets:models && npm run assets:build",
+    "visual-check": "node scripts/visual-check.mjs",
+    "assets:repair": "node scripts/repair-materials.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@gltf-transform/core": "^4.4.2",
+    "@gltf-transform/extensions": "^4.4.2",
+    "@gltf-transform/functions": "^4.4.2",
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.10.5",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.18.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "sharp": "^0.35.3",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true,
+    "sharp@0.35.3": true,
+    "sharp@0.33.5": true
+  }
+}

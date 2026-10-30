@@ -1,0 +1,468 @@
+/* ==========================================================================
+   Immersive room layout.
+
+   The 3D stage fills the viewport. Everything else floats above it in
+   pointer-transparent zones, so the board can be orbited from almost anywhere
+   on screen and the scene is never boxed into a small rectangle.
+   ========================================================================== */
+
+:root[data-immersive='on'],
+:root[data-immersive='on'] body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.room {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* --- stage ---------------------------------------------------------------- */
+
+.room__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.room__stage canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none;
+}
+
+.room__sceneLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.6rem;
+}
+
+.room__stage2d {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.5rem, 2vw, 2rem);
+  overflow: auto;
+}
+
+/* --- HUD scaffolding ------------------------------------------------------ */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  /* The layer itself never eats pointer events; individual cards opt back in. */
+  pointer-events: none;
+  transition: opacity var(--dur) ease;
+}
+.room.is-hudHidden .hud {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hud__zone {
+  position: absolute;
+  display: grid;
+  gap: 0.5rem;
+  pointer-events: none;
+  max-width: min(30rem, 40vw);
+}
+.hud__zone > * {
+  pointer-events: auto;
+}
+
+.hud__topLeft {
+  top: var(--hud-gap);
+  left: var(--hud-gap);
+  justify-items: start;
+}
+.hud__topRight {
+  top: var(--hud-gap);
+  right: var(--hud-gap);
+  justify-items: end;
+}
+.hud__left {
+  top: 50%;
+  left: var(--hud-gap);
+  transform: translateY(-50%);
+  width: min(21rem, 34vw);
+}
+.hud__bottom {
+  bottom: var(--hud-gap);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(56rem, 92vw);
+  justify-items: center;
+}
+
+:root {
+  --hud-gap: clamp(0.6rem, 1.4vw, 1.1rem);
+}
+
+/* --- the floating card treatment ------------------------------------------ */
+
+.hud__card {
+  background: var(--map-surface);
+  border: 1px solid var(--map-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+}
+
+/* Panels inside a floating card should not double up on chrome. */
+.hud__card .panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  margin-bottom: 0.4rem;
+  border-radius: 0;
+}
+.hud__card .panel + .panel {
+  border-top: 1px solid var(--map-border);
+  padding-top: 0.4rem;
+}
+.hud__card .panel__head {
+  padding: 0.45rem 0 0.35rem;
+  background: none;
+}
+.hud__card .panel__body {
+  padding: 0 0 0.4rem;
+}
+
+/* --- room chip ------------------------------------------------------------ */
+
+.hud__roomChip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.8rem 0.45rem 0.5rem;
+}
+.hud__homeBtn {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  font-size: 1.1rem;
+  color: var(--map-text);
+  text-decoration: none;
+  border: 1px solid var(--map-border);
+  border-radius: var(--radius);
+}
+.hud__homeBtn:hover {
+  background: var(--map-accent-soft);
+}
+.hud__roomText {
+  display: grid;
+  min-width: 0;
+}
+.hud__roomName {
+  font-family: var(--map-display-font);
+  font-weight: 700;
+  font-size: 0.98rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud__roomMeta {
+  font-size: 0.72rem;
+  color: var(--map-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud__notice {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  max-width: 22rem;
+  border-left: 3px solid var(--warn);
+}
+
+/* --- tool strip ----------------------------------------------------------- */
+
+.hud__tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+}
+.hud__tool {
+  padding: 0.34em 0.7em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--map-text-muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.hud__tool:hover {
+  color: var(--map-text);
+  background: var(--map-accent-soft);
+}
+.hud__tool.is-active {
+  color: #06080f;
+  background: var(--map-accent);
+}
+
+/* --- player cards --------------------------------------------------------- */
+
+.hud__player {
+  padding: 0;
+  overflow: hidden;
+}
+.hud__player .playercard {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 0.75rem;
+}
+.hud__player .playercard.is-running {
+  background: var(--map-accent-soft);
+}
+
+.hud__waiting {
+  padding: 0.55rem 0.8rem;
+  font-size: 0.85rem;
+}
+.hud__waiting p {
+  margin: 0;
+}
+
+/* --- action bar ----------------------------------------------------------- */
+
+.hud__controls {
+  padding: 0.55rem 0.8rem;
+  max-width: 100%;
+}
+.hud__controls .controls__row {
+  justify-content: center;
+}
+
+/* --- dock ----------------------------------------------------------------- */
+
+.hud__dock {
+  position: absolute;
+  top: calc(var(--hud-gap) + 3.1rem);
+  right: var(--hud-gap);
+  bottom: var(--hud-gap);
+  width: min(23rem, 32vw);
+  pointer-events: none;
+  transform: translateX(calc(100% + var(--hud-gap) + 1rem));
+  opacity: 0;
+  transition: transform var(--dur) ease, opacity var(--dur) ease;
+}
+.hud__dock.is-open {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hud__dockInner {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  height: 100%;
+  padding: 0.7rem;
+  overflow: hidden;
+}
+.hud__dockInner > .segmented {
+  margin-bottom: 0;
+  width: 100%;
+  justify-content: space-between;
+}
+.hud__dockInner > .segmented .segmented__option {
+  flex: 1;
+  text-align: center;
+}
+.hud__dockBody {
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 2px;
+  scrollbar-width: thin;
+}
+.hud__dockBody::-webkit-scrollbar {
+  width: 8px;
+}
+.hud__dockBody::-webkit-scrollbar-thumb {
+  background: var(--map-border);
+  border-radius: 4px;
+}
+
+/* --- overlays ------------------------------------------------------------- */
+
+.room__resultOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  width: min(30rem, 90vw);
+}
+.room__resultOverlay .hud__card {
+  padding: 0.2rem;
+}
+.room__resultOverlay .result {
+  background: transparent;
+  border: none;
+  border-left: 4px solid var(--map-text-muted);
+  border-radius: var(--radius);
+}
+
+.room__showHud {
+  position: absolute;
+  bottom: var(--hud-gap);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45em 0.9em;
+  font-size: 0.85rem;
+  color: var(--map-text);
+  cursor: pointer;
+  background: var(--map-surface);
+  border: 1px solid var(--map-border);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+  opacity: 0.55;
+  transition: opacity var(--dur-fast);
+}
+.room__showHud:hover {
+  opacity: 1;
+}
+.room__showHud kbd {
+  padding: 0.05em 0.35em;
+  font-size: 0.72rem;
+  font-family: ui-monospace, Menlo, monospace;
+  border: 1px solid var(--map-border);
+  border-radius: 4px;
+}
+
+.room__attribution {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.76rem;
+  color: var(--map-text-muted);
+}
+
+/* --- pre-room states (these are normal pages, not immersive) -------------- */
+
+.room__waiting {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+  text-align: center;
+  padding-top: 4rem;
+}
+.room__failActions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: var(--space);
+}
+
+/* --- responsive ----------------------------------------------------------- */
+
+/* Tablet: the player rail moves to the top strip so the board keeps the middle. */
+@media (max-width: 1100px) {
+  .hud__left {
+    top: calc(var(--hud-gap) + 3.4rem);
+    transform: none;
+    width: min(18rem, 44vw);
+  }
+  .hud__dock {
+    width: min(21rem, 46vw);
+  }
+}
+
+/* Phone: the dock becomes a bottom sheet, the rail becomes a top bar. */
+@media (max-width: 760px) {
+  :root {
+    --hud-gap: 0.5rem;
+  }
+
+  .hud__zone {
+    max-width: none;
+  }
+
+  .hud__topLeft {
+    left: var(--hud-gap);
+    right: calc(var(--hud-gap) + 8.5rem);
+    max-width: none;
+  }
+  .hud__roomMeta {
+    display: none;
+  }
+
+  .hud__left {
+    top: calc(var(--hud-gap) + 3rem);
+    left: var(--hud-gap);
+    right: var(--hud-gap);
+    width: auto;
+    grid-template-columns: 1fr 1fr;
+  }
+  .hud__left .hud__waiting {
+    grid-column: 1 / -1;
+  }
+
+  .hud__tools {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 8.5rem;
+  }
+  .hud__tool {
+    padding: 0.3em 0.5em;
+    font-size: 0.74rem;
+  }
+
+  .hud__bottom {
+    bottom: var(--hud-gap);
+    left: var(--hud-gap);
+    right: var(--hud-gap);
+    transform: none;
+    max-width: none;
+  }
+  .hud__controls {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .hud__dock {
+    top: auto;
+    left: var(--hud-gap);
+    right: var(--hud-gap);
+    bottom: var(--hud-gap);
+    width: auto;
+    height: min(62vh, 30rem);
+    transform: translateY(calc(100% + 1rem));
+  }
+  .hud__dock.is-open {
+    transform: none;
+  }
+  /* With the dock open on a phone it covers the action bar, so hide that. */
+  .hud__dock.is-open ~ .hud__bottom,
+  .hud__dock.is-open + .hud__bottom {
+    display: none;
+  }
+}
+
+/* Very short windows: drop the player rail to a single compact row. */
+@media (max-height: 560px) {
+  .hud__left {
+    top: calc(var(--hud-gap) + 2.9rem);
+    transform: none;
+  }
+}

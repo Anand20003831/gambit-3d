@@ -1,0 +1,63 @@
+{
+  "city-props": [
+    "sign1",
+    "sign2",
+    "sign3",
+    "sign4",
+    "signSmall1",
+    "signSmall2",
+    "tv1",
+    "tv2",
+    "ac",
+    "acStacked",
+    "antenna1",
+    "antenna2",
+    "cable",
+    "streetLight",
+    "pipe",
+    "support"
+  ],
+  "apartment-furniture": [
+    "sofa",
+    "sofaCorner",
+    "armchair",
+    "table",
+    "lowTable",
+    "chair",
+    "stool",
+    "bookcase",
+    "shelf",
+    "desk",
+    "sideTable"
+  ],
+  "station-props": [
+    "computer",
+    "computerSmall",
+    "shelf",
+    "shelfTall",
+    "crate",
+    "crateLong",
+    "pod",
+    "vessel",
+    "vesselTall",
+    "base",
+    "column",
+    "columnSlim",
+    "pipes",
+    "containerFull"
+  ],
+  "city-buildings": [
+    "towerLarge",
+    "towerMedium",
+    "towerSmall"
+  ],
+  "space-scenery": [
+    "planetA",
+    "planetB",
+    "planetC",
+    "dome",
+    "support",
+    "connector",
+    "moduleLong"
+  ]
+}

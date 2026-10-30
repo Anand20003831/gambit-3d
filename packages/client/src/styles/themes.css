@@ -1,0 +1,115 @@
+/* ==========================================================================
+   Per-map interface skins.
+
+   Each map restyles the shell, not just its 3D scene: panel treatment,
+   typography, edge decoration and accent behaviour all change. The tokens
+   themselves are set from JS (RoomPage) so the two stay in step; this file
+   holds the structural differences CSS is better at.
+   ========================================================================== */
+
+/* --- Neon City Apartment: hard edges, scanlines, glow --------------------- */
+
+:root[data-map='apartment'] body {
+  background:
+    linear-gradient(180deg, #0b0518 0%, #08040f 55%, #05030c 100%);
+}
+
+:root[data-map='apartment'] .panel {
+  border-radius: 2px;
+  border-color: rgba(0, 229, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.08), 0 0 24px rgba(0, 229, 255, 0.06);
+  position: relative;
+}
+/* Clipped corner, the cheapest way to read as "HUD". */
+:root[data-map='apartment'] .panel::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 12px; height: 12px;
+  background: var(--bg);
+  border-left: 1px solid rgba(0, 229, 255, 0.4);
+  transform: translate(0.5px, -0.5px) rotate(45deg) translateY(-9px);
+}
+
+:root[data-map='apartment'] .panel__title,
+:root[data-map='apartment'] .field__label,
+:root[data-map='apartment'] .slider__label {
+  font-family: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+:root[data-map='apartment'] .btn { border-radius: 2px; }
+:root[data-map='apartment'] .btn--primary {
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.45);
+  text-shadow: none;
+}
+:root[data-map='apartment'] .badge { border-radius: 2px; font-family: ui-monospace, Menlo, monospace; }
+
+/* A faint scanline wash over the room chrome only - never over the canvas,
+   which would fight with the renderer's own effects. */
+:root[data-map='apartment'] .room__bar,
+:root[data-map='apartment'] .room__sidebar .panel {
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(0, 229, 255, 0.035) 0px,
+    rgba(0, 229, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+:root[data-map='apartment'] .share__code {
+  text-shadow: 0 0 12px currentColor;
+}
+
+/* --- Orbital Station: glass, thin rules, wide tracking -------------------- */
+
+:root[data-map='station'] body {
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 10%, #191c3e 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 90%, #2a1d43 0%, transparent 55%),
+    #05061a;
+}
+
+:root[data-map='station'] .panel {
+  border-radius: 14px;
+  border-color: rgba(169, 155, 255, 0.24);
+  background: linear-gradient(
+    180deg,
+    rgba(24, 28, 58, 0.86) 0%,
+    rgba(12, 14, 34, 0.9) 100%
+  );
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(200, 190, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-map='station'] .panel__head {
+  border-bottom-color: rgba(169, 155, 255, 0.18);
+}
+:root[data-map='station'] .panel__title {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  color: var(--map-text-muted);
+}
+
+:root[data-map='station'] .btn { border-radius: 999px; }
+:root[data-map='station'] .btn--primary { box-shadow: 0 4px 18px rgba(169, 155, 255, 0.32); }
+:root[data-map='station'] .badge { border-radius: 999px; }
+:root[data-map='station'] .room__bar { backdrop-filter: blur(14px); }
+
+/* --- reduced motion: kill the decorative animation everywhere ------------- */
+
+:root[data-motion='reduced'] .playercard.is-low .playercard__clock { animation: none; }
+:root[data-motion='reduced'] .conn__dot { animation: none; }
+:root[data-motion='reduced'] .toast { animation: none; }
+
+/* --- colour-blind mode: strengthen non-hue cues --------------------------- */
+
+:root[data-cbsafe='on'] .badge--success::before { content: '✓ '; }
+:root[data-cbsafe='on'] .badge--warn::before { content: '! '; }
+:root[data-cbsafe='on'] .badge--danger::before { content: '✕ '; }
+:root[data-cbsafe='on'] .result--win .result__score::before { content: '▲ '; }
+:root[data-cbsafe='on'] .result--loss .result__score::before { content: '▼ '; }
+:root[data-cbsafe='on'] .result--draw .result__score::before { content: '= '; }
