@@ -6,6 +6,10 @@ multiplayer, and a server that is the sole authority on the rules.
 The board fills the window; everything else floats above it, so the scene is
 never boxed into a small rectangle. Press **H** to hide the interface entirely.
 
+![A game in progress on the Neon City Apartment map](docs/images/neon-city-apartment.png)
+
+![A game in progress on the Orbital Station map](docs/images/orbital-station.png)
+
 ## Built with
 
 TypeScript, React, Three.js, Node.js, Express, Socket.IO and SQLite, tested with
